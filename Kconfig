@@ -1,0 +1,12 @@
+menuconfig TMTC
+    bool "Custom TMTC api"
+    help
+    Enable YourCo TMTC api
+
+if TMTC
+    config TMTC_LOG_LEVEL
+        int "TMTC api log level"
+        default 3
+        help
+        Set the log level for the TMTC api (0-4).
+endif # TMTC
