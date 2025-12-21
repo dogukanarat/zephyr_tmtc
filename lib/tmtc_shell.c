@@ -51,8 +51,6 @@ SHELL_CMD_REGISTER(tmtc, &sub_tmtc_cmds, "Base command for TMTC operations", NUL
 
 static int tmtc_shell_list(const struct shell *shell, size_t argc, char **argv)
 {
-    struct tmtc_cmd_handler *cmd;
-
     shell_print(shell, "Registered TMTC Commands:");
     TMTC_CMD_FOREACH(cmd) {
         shell_print(shell, "  ID: %u, Callback: %p, Min Data Len: %u, Max Data Len: %u, Description: %s",
