@@ -28,8 +28,6 @@ LOG_MODULE_REGISTER(tmtc, LOG_LEVEL_DBG);
 
 const struct tmtc_cmd_handler *tmtc_get_cmd_handler(uint16_t cmd_id)
 {
-    const struct tmtc_cmd_handler *cmd = NULL;
-
     TMTC_CMD_FOREACH(cmd) {
         if (cmd->id == cmd_id) {
             return cmd;
