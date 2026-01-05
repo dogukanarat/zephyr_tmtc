@@ -74,7 +74,8 @@ extern const struct tmtc_cmd_handler __tmtc_cmd_handlers_start[];
 extern const struct tmtc_cmd_handler __tmtc_cmd_handlers_end[];
 
 extern const struct tmtc_cmd_handler *tmtc_get_cmd_handler(uint16_t cmd_id);
-extern int32_t tmtc_run_cmd(uint16_t cmd_id, struct tmtc_args *rqst, struct tmtc_args *rply);
+extern int32_t tmtc_run_id(uint16_t id, struct tmtc_args *rqst, struct tmtc_args *rply);
+extern int32_t tmtc_run_handler(const struct tmtc_cmd_handler *handler, struct tmtc_args *rqst, struct tmtc_args *rply);
 extern void *tmtc_malloc(size_t size);
 extern void tmtc_free(void *ptr);
 

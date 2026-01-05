@@ -10,25 +10,22 @@
 
 /* Imports */
 
-
 /* Definitions */
 
 LOG_MODULE_REGISTER(tmtc, LOG_LEVEL_DBG);
 
 /* Types */
 
-
 /* Forward Declarations */
 
-
 /* Variables */
-
 
 /* Functions */
 
 const struct tmtc_cmd_handler *tmtc_get_cmd_handler(uint16_t cmd_id)
 {
-    TMTC_CMD_FOREACH(cmd) {
+    TMTC_CMD_FOREACH(cmd)
+    {
         if (cmd->id == cmd_id) {
             return cmd;
         }
@@ -39,33 +36,53 @@ const struct tmtc_cmd_handler *tmtc_get_cmd_handler(uint16_t cmd_id)
     return NULL;
 }
 
-int32_t tmtc_run_cmd(uint16_t cmd_id, struct tmtc_args *rqst, struct tmtc_args *rply)
+int32_t tmtc_run_handler(
+    const struct tmtc_cmd_handler *handler, struct tmtc_args *rqst, struct tmtc_args *rply)
 {
-    if (!rply || !rqst) {
-        LOG_ERR("Invalid request or reply arguments for command ID %u", cmd_id);
+    if (handler == NULL) {
+        LOG_ERR("Handler is NULL");
         return -EINVAL;
     }
 
-    const struct tmtc_cmd_handler *cmd = tmtc_get_cmd_handler(cmd_id);
-    if (cmd == NULL) {
-        LOG_ERR("Command ID %u not recognized", cmd_id);
-        return -ENOENT;
+    if (!rply || !rqst) {
+        LOG_ERR("Invalid request or reply arguments for command ID %u", handler->id);
+        return -EINVAL;
     }
 
-    if (cmd->handler == NULL) {
-        LOG_ERR("No handler defined for command ID %u", cmd_id);
+    if (handler->handler == NULL) {
+        LOG_ERR("No handler defined for command ID %u", handler->id);
         return -ENOSYS;
     }
 
     /* Validate request data length */
-    if (rqst->len < cmd->min_data_len || rqst->len > cmd->max_data_len) {
-        LOG_ERR("Invalid data length for command ID %u: received %u, expected [%u, %u]",
-                cmd_id, rqst->len, cmd->min_data_len, cmd->max_data_len);
+    if (rqst->len < handler->min_data_len || rqst->len > handler->max_data_len) {
+        LOG_ERR(
+            "Invalid data length for command ID %u: received %u, expected [%u, %u]",
+            handler->id,
+            rqst->len,
+            handler->min_data_len,
+            handler->max_data_len);
         return -EMSGSIZE;
     }
 
     /* Call the command handler */
-    return cmd->handler(rqst, rply);
+    return handler->handler(rqst, rply);
+}
+
+int32_t tmtc_run_id(uint16_t id, struct tmtc_args *rqst, struct tmtc_args *rply)
+{
+    if (!rply || !rqst) {
+        LOG_ERR("Invalid request or reply arguments for command ID %u", id);
+        return -EINVAL;
+    }
+
+    const struct tmtc_cmd_handler *handler = tmtc_get_cmd_handler(id);
+    if (handler == NULL) {
+        LOG_ERR("Command ID %u not recognized", id);
+        return -ENOENT;
+    }
+
+    return tmtc_run_handler(handler, rqst, rply);
 }
 
 void *tmtc_malloc(size_t size)

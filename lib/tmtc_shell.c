@@ -72,8 +72,8 @@ static int tmtc_shell_run(const struct shell *shell, size_t argc, char **argv)
     }
 
     uint16_t cmd_id = strtoul(argv[1], NULL, 0);
-    const struct tmtc_cmd_handler *cmd = tmtc_get_cmd_handler(cmd_id);
-    if (cmd == NULL) {
+    const struct tmtc_cmd_handler *handler = tmtc_get_cmd_handler(cmd_id);
+    if (handler == NULL) {
         shell_print(shell, "Command ID %u not found.", cmd_id);
         return -ENOEXEC;
     }
@@ -84,8 +84,8 @@ static int tmtc_shell_run(const struct shell *shell, size_t argc, char **argv)
     if (argc >= 3) {
         /* Convert hex string to binary data */
         size_t data_len = strlen(argv[2]) / 2;
-        if (data_len > cmd->max_data_len) {
-            shell_print(shell, "Error: Data length exceeds maximum of %u bytes.", cmd->max_data_len);
+        if (data_len > handler->max_data_len) {
+            shell_print(shell, "Error: Data length exceeds maximum of %u bytes.", handler->max_data_len);
             return -EINVAL;
         }
 
@@ -100,7 +100,7 @@ static int tmtc_shell_run(const struct shell *shell, size_t argc, char **argv)
         rqst.len = data_len;
     }
 
-    int32_t ret = tmtc_run_cmd(cmd_id, &rqst, &rply);
+    int32_t ret = tmtc_run_handler(handler, &rqst, &rply);
 
     shell_print(shell, "Command ID %d executed with result: 0x%08X", cmd_id, ret);
     shell_print(shell, "Reply Data (%u bytes):", rply.len);
