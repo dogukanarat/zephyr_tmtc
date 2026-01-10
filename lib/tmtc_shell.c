@@ -89,7 +89,7 @@ static int tmtc_shell_run(const struct shell *shell, size_t argc, char **argv)
             return -EINVAL;
         }
 
-        rqst.data = tmtc_malloc(data_len);
+        rqst.data = malloc(data_len);
         if (rqst.data == NULL) {
             return -ENOMEM;
         }
@@ -99,6 +99,8 @@ static int tmtc_shell_run(const struct shell *shell, size_t argc, char **argv)
         }
         rqst.len = data_len;
     }
+
+    rply.ops.malloc = (uint8_t *(*)(size_t))malloc;
 
     int32_t ret = tmtc_run_handler(handler, &rqst, &rply);
 
@@ -111,10 +113,10 @@ static int tmtc_shell_run(const struct shell *shell, size_t argc, char **argv)
     }
 
     if (rqst.data) {
-        tmtc_free(rqst.data);
+        free(rqst.data);
     }
     if (rply.data) {
-        tmtc_free(rply.data);
+        free(rply.data);
     }
 
     return ret;

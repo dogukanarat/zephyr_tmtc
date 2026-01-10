@@ -4,8 +4,8 @@
 
 /* Includes */
 
-#include <zephyr/logging/log.h>
 #include <zephyr/kernel.h>
+#include <zephyr/logging/log.h>
 #include <zephyr/tmtc.h>
 
 /* Imports */
@@ -26,7 +26,8 @@ const struct tmtc_cmd_handler *tmtc_get_cmd_handler(uint16_t cmd_id)
 {
     TMTC_CMD_FOREACH(cmd)
     {
-        if (cmd->id == cmd_id) {
+        if (cmd->id == cmd_id)
+        {
             return cmd;
         }
     }
@@ -37,25 +38,31 @@ const struct tmtc_cmd_handler *tmtc_get_cmd_handler(uint16_t cmd_id)
 }
 
 int32_t tmtc_run_handler(
-    const struct tmtc_cmd_handler *handler, struct tmtc_args *rqst, struct tmtc_args *rply)
+    const struct tmtc_cmd_handler *handler,
+    struct tmtc_args *rqst,
+    struct tmtc_args *rply)
 {
-    if (handler == NULL) {
+    if (handler == NULL)
+    {
         LOG_ERR("Handler is NULL");
         return -EINVAL;
     }
 
-    if (!rply || !rqst) {
+    if (!rply || !rqst)
+    {
         LOG_ERR("Invalid request or reply arguments for command ID %u", handler->id);
         return -EINVAL;
     }
 
-    if (handler->handler == NULL) {
+    if (handler->handler == NULL)
+    {
         LOG_ERR("No handler defined for command ID %u", handler->id);
         return -ENOSYS;
     }
 
     /* Validate request data length */
-    if (rqst->len < handler->min_data_len || rqst->len > handler->max_data_len) {
+    if (rqst->len < handler->min_data_len || rqst->len > handler->max_data_len)
+    {
         LOG_ERR(
             "Invalid data length for command ID %u: received %u, expected [%u, %u]",
             handler->id,
@@ -71,13 +78,15 @@ int32_t tmtc_run_handler(
 
 int32_t tmtc_run_id(uint16_t id, struct tmtc_args *rqst, struct tmtc_args *rply)
 {
-    if (!rply || !rqst) {
+    if (!rply || !rqst)
+    {
         LOG_ERR("Invalid request or reply arguments for command ID %u", id);
         return -EINVAL;
     }
 
     const struct tmtc_cmd_handler *handler = tmtc_get_cmd_handler(id);
-    if (handler == NULL) {
+    if (handler == NULL)
+    {
         LOG_ERR("Command ID %u not recognized", id);
         return -ENOENT;
     }
@@ -85,16 +94,13 @@ int32_t tmtc_run_id(uint16_t id, struct tmtc_args *rqst, struct tmtc_args *rply)
     return tmtc_run_handler(handler, rqst, rply);
 }
 
-void *tmtc_malloc(size_t size)
+uint8_t *tmtc_malloc(struct tmtc_args *rply, size_t size)
 {
-    void *ptr = k_malloc(size);
-    if (ptr == NULL) {
-        LOG_ERR("Memory allocation of size %u failed", size);
+    if (NULL == rply || NULL == rply->ops.malloc)
+    {
+        LOG_ERR("Invalid tmtc_args or malloc operation");
+        return NULL;
     }
-    return ptr;
-}
 
-void tmtc_free(void *ptr)
-{
-    k_free(ptr);
+    return rply->ops.malloc(size);
 }
