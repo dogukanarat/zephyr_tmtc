@@ -2,11 +2,11 @@ if(CONFIG_TMTC)
   zephyr_library()
 
   zephyr_library_sources_ifdef(CONFIG_TMTC
-    lib/tmtc.c
+    src/tmtc.c
   )
 
   zephyr_library_sources_ifdef(CONFIG_SHELL
-    lib/tmtc_shell.c
+    src/tmtc_shell.c
   )
 
   zephyr_include_directories(include)

@@ -22,7 +22,7 @@ LOG_MODULE_REGISTER(tmtc, LOG_LEVEL_DBG);
 
 /* Functions */
 
-const struct tmtc_cmd_handler *tmtc_get_cmd_handler(uint16_t cmd_id)
+const struct tmtc_cmd_handler *tmtc_get_cmd_handler (uint16_t cmd_id)
 {
     TMTC_CMD_FOREACH(cmd)
     {
@@ -37,7 +37,7 @@ const struct tmtc_cmd_handler *tmtc_get_cmd_handler(uint16_t cmd_id)
     return NULL;
 }
 
-int32_t tmtc_run_handler(
+int32_t tmtc_run_handler (
     const struct tmtc_cmd_handler *handler,
     struct tmtc_args *rqst,
     struct tmtc_args *rply)
@@ -76,7 +76,7 @@ int32_t tmtc_run_handler(
     return handler->handler(rqst, rply);
 }
 
-int32_t tmtc_run_id(uint16_t id, struct tmtc_args *rqst, struct tmtc_args *rply)
+int32_t tmtc_run_id (uint16_t id, struct tmtc_args *rqst, struct tmtc_args *rply)
 {
     if (!rply || !rqst)
     {
@@ -94,7 +94,7 @@ int32_t tmtc_run_id(uint16_t id, struct tmtc_args *rqst, struct tmtc_args *rply)
     return tmtc_run_handler(handler, rqst, rply);
 }
 
-uint8_t *tmtc_malloc(struct tmtc_args *rply, size_t size)
+uint8_t *tmtc_malloc (struct tmtc_args *rply, size_t size)
 {
     if (NULL == rply || NULL == rply->ops.malloc)
     {
