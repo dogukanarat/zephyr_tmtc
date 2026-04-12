@@ -48,9 +48,9 @@ static int tmtc_shell_list (const struct shell *shell, size_t argc, char **argv)
             shell,
             "  ID: %u, Callback: %p, Min Data Len: %u, Max Data Len: %u, Description: %s",
             cmd->id,
-            (void *)cmd->handler,
-            cmd->min_data_len,
-            cmd->max_data_len,
+            (void *)cmd->cb,
+            cmd->rply_size,
+            cmd->rqst_size,
             "(no description)");
     }
 
@@ -66,11 +66,12 @@ static int tmtc_shell_run (const struct shell *shell, size_t argc, char **argv)
     }
 
     uint16_t cmd_id = strtoul(argv[1], NULL, 0);
+
     const struct tmtc_cmd_handler *handler = tmtc_get_cmd_handler(cmd_id);
-    if (handler == NULL)
+    if (!handler)
     {
-        shell_print(shell, "Command ID %u not found.", cmd_id);
-        return -ENOEXEC;
+        shell_print(shell, "Error: Command ID %u not found.", cmd_id);
+        return -ENOENT;
     }
 
     struct tmtc_args rqst = {0};
@@ -80,31 +81,22 @@ static int tmtc_shell_run (const struct shell *shell, size_t argc, char **argv)
     {
         /* Convert hex string to binary data */
         size_t data_len = strlen(argv[2]) / 2;
-        if (data_len > handler->max_data_len)
+        if (data_len > handler->rqst_size)
         {
             shell_print(
                 shell,
                 "Error: Data length exceeds maximum of %u bytes.",
-                handler->max_data_len);
+                handler->rqst_size);
             return -EINVAL;
-        }
-
-        rqst.data = malloc(data_len);
-        if (rqst.data == NULL)
-        {
-            return -ENOMEM;
         }
 
         for (size_t i = 0; i < data_len; i++)
         {
             sscanf(&argv[2][i * 2], "%2hhx", &((uint8_t *)rqst.data)[i]);
         }
-        rqst.len = data_len;
     }
 
-    rply.ops.malloc = (uint8_t * (*)(size_t)) malloc;
-
-    int32_t ret = tmtc_run_handler(handler, &rqst, &rply);
+    int32_t ret = tmtc_request_with_handler(handler, &rqst, &rply);
 
     shell_print(shell, "Command ID %d executed with result: 0x%08X", cmd_id, ret);
     shell_print(shell, "Reply Data (%u bytes):", rply.len);

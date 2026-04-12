@@ -1,5 +1,6 @@
 menuconfig TMTC
     bool "Custom TMTC api"
+    select NANOPB
     help
     Enable YourCo TMTC api
 
